@@ -7,7 +7,14 @@
     const app = context?.application;
     return React.createElement(
       "div",
-      { style: { padding: "10px" } },
+      { style: { 
+        padding: "15px",
+        backgroundColor: "#fff8dc",
+        border: "4px dashed #ff69b4",
+        borderRadius: "15px",
+        fontFamily: "'Comic Sans MS', cursive, sans-serif",
+        boxShadow: "4px 4px 0px #00000055",
+      } },
       app
         ? `Application Name: ${JSON.stringify(app)}`
         : "No application selected"
@@ -26,8 +33,15 @@
         },
         style: {
           cursor: "pointer",
-          padding: "6px 12px",
-          color: "#fff",
+          padding: "10px 20px",
+          backgroundColor: "#ffcc00",
+          border: "3px solid #ff69b4",
+          borderRadius: "20px",
+          color: "#000",
+          fontWeight: "bold",
+          fontFamily: "'Comic Sans MS', cursive, sans-serif",
+          boxShadow: "3px 3px 0px #ff69b4",
+          transition: "all 0.2s",
         },
       },
       "Show App Info"
