@@ -9,7 +9,7 @@
       "div",
       { style: { padding: "10px" } },
       app
-        ? `Application Name: ${app.metadata.name}`
+        ? `Application Name: ${app}`
         : "No application selected"
     );
   };
