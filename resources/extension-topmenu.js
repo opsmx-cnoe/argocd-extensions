@@ -6,7 +6,7 @@
     return React.createElement(
             "div",
             { style: { padding: "10px" } },
-            "This is a flyout hyderabad"
+            "This is "+application.metadata?.['name']
     );
   };
   const component = () => {
