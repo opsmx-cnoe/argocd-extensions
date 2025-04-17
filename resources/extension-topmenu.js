@@ -9,7 +9,7 @@
       "div",
       { style: { padding: "10px" } },
       app
-        ? `Application Name: ${app}`
+        ? `Application Name: ${JSON.stringify(app)}`
         : "No application selected"
     );
   };
