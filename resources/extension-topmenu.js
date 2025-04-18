@@ -11,9 +11,14 @@
     
       const patch = [
         {
-          op: 'add',
-          path: '/metadata/annotations/my.annotation',
-          value: inputValue,
+          Namespace: app.metadata.name,
+          ResourceName : app.metadata.namespace,
+          // Kind: application.kind,
+          Project: app.Project,
+          PatchType:"application/json-patch+json",
+          Patch: "{\"metadata\":{\n  \"annotations\":{\n    \"my-annotation\":"+inputValue+"\n  }\n}}"
+          // path: '/metadata/annotations/my.annotation',
+          // value: inputValue,
         },
       ];
     
@@ -52,6 +57,7 @@
         boxShadow: '4px 4px 0px #00000055',
       },
       children: [
+        React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation value:'),
         React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation value:'),
         React.createElement('input', {
           type: 'text',
