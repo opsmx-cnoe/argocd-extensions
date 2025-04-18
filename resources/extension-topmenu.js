@@ -8,7 +8,7 @@
 
     const submitAnnotation = async () => {
       if (!inputValue || !app) return;
-
+    
       const patch = [
         {
           op: 'add',
@@ -16,7 +16,7 @@
           value: inputValue,
         },
       ];
-
+    
       try {
         const res = await fetch(
           `/api/v1/applications/${app.metadata.name}?proj=${app.spec.project}`,
@@ -28,16 +28,19 @@
             body: JSON.stringify(patch),
           }
         );
-
+    
+        const responseText = await res.text(); // Read the response body
+    
         if (res.ok) {
           setStatusMessage('✅ Annotation added!');
         } else {
-          setStatusMessage('❌ Failed to add annotation.'+res.body);
+          setStatusMessage(`❌ Failed to add annotation:\n${responseText}`);
         }
       } catch (err) {
-        setStatusMessage('❌ Error occurred.');
+        setStatusMessage(`❌ Error occurred: ${err.message}`);
       }
     };
+    
 
     return React.createElement('div', {
       style: {
