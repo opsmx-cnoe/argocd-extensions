@@ -16,7 +16,8 @@
           // Kind: application.kind,
           Project: app.Project,
           PatchType:"application/json-patch+json",
-          Patch: "{\"metadata\":{\n  \"annotations\":{\n    \"my-annotation\":"+inputValue+"\n  }\n}}"
+          // Patch: "{\"metadata\":{\n  \"annotations\":{\n    \"my-annotation\":"+inputValue+"\n  }\n}}"
+          Patch: '{"metadata": {"annotations": {"myannotation": "'+inputValue+'"}}}'
           // path: '/metadata/annotations/my.annotation',
           // value: inputValue,
         },
