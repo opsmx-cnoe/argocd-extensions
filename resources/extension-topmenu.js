@@ -16,7 +16,7 @@
         boxShadow: "4px 4px 0px #00000055",
       } },
       app
-        ? `Application Name: ${JSON.stringify(app)}`
+        ? `Context Object: \n\n ${JSON.stringify(context)}`
         : "No application selected"
     );
   };
