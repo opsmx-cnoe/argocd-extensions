@@ -11,13 +11,13 @@
     
       const patch = [
         {
-          Namespace: app.metadata.name,
-          ResourceName : app.metadata.namespace,
+          // appNamespace: app.metadata.name,
+          // name : app.metadata.namespace,
           // Kind: application.kind,
-          Project: app.Project,
-          PatchType:"application/json-patch+json",
+          // project: app.Project,
+          patchType:"merge",
           // Patch: "{\"metadata\":{\n  \"annotations\":{\n    \"my-annotation\":"+inputValue+"\n  }\n}}"
-          Patch: '{"metadata": {"annotations": {"myannotation": "'+inputValue+'"}}}'
+          patch: '{"metadata": {"annotations": {"utkarshannotation": "'+inputValue+'"}}}'
           // path: '/metadata/annotations/my.annotation',
           // value: inputValue,
         },
@@ -25,7 +25,7 @@
     
       try {
         const res = await fetch(
-          `/api/v1/applications/${app.metadata.name}?proj=${app.spec.project}`,
+          `/api/v1/applications/${app.metadata.name}`,
           {
             method: 'PATCH',
             headers: {
