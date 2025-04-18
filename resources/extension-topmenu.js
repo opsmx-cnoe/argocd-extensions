@@ -32,7 +32,7 @@
         if (res.ok) {
           setStatusMessage('✅ Annotation added!');
         } else {
-          setStatusMessage('❌ Failed to add annotation.');
+          setStatusMessage('❌ Failed to add annotation.'+res.body);
         }
       } catch (err) {
         setStatusMessage('❌ Error occurred.');
