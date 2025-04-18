@@ -25,7 +25,7 @@
     
       try {
         const res = await fetch(
-          `/api/v1/applications/${app.metadata.name}`,
+          `/api/v1/applications/configmap`,
           {
             method: 'PATCH',
             headers: {
