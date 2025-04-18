@@ -9,29 +9,26 @@
     const submitAnnotation = async () => {
       if (!inputValue || !app) return;
     
-      const patch = [
-        {
-          // appNamespace: app.metadata.name,
-          // name : app.metadata.namespace,
-          // Kind: application.kind,
-          // project: app.Project,
-          patchType:"merge",
-          // Patch: "{\"metadata\":{\n  \"annotations\":{\n    \"my-annotation\":"+inputValue+"\n  }\n}}"
-          patch: "{\"metadata\": {\"annotations\": {\"utkarshcustom\": \"testman\"}}}",
-          // path: '/metadata/annotations/my.annotation',
-          // value: inputValue,
-        },
-      ];
+      const patchObject = {
+        patchType: "merge",
+        patch: JSON.stringify({
+          metadata: {
+            annotations: {
+              utkarshannotation: inputValue
+            }
+          }
+        }),
+      };
     
       try {
         const res = await fetch(
-          `/api/v1/applications/configmap`,
+          `/api/v1/applications/${app.metadata.name}`,
           {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(patch),
+            body: JSON.stringify(patchObject), // final stringify here
           }
         );
     
