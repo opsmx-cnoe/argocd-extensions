@@ -17,7 +17,7 @@
           // project: app.Project,
           patchType:"merge",
           // Patch: "{\"metadata\":{\n  \"annotations\":{\n    \"my-annotation\":"+inputValue+"\n  }\n}}"
-          patch: '{"metadata": {"annotations": {"utkarshannotation": "'+inputValue+'"}}}'
+          patch: "{\"metadata\": {\"annotations\": {\"utkarshcustom\": \"testman\"}}}",
           // path: '/metadata/annotations/my.annotation',
           // value: inputValue,
         },
