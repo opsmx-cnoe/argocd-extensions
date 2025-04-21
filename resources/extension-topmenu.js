@@ -14,9 +14,9 @@
         patchType: "merge",
         patch: JSON.stringify({
           metadata: {
-            annotations: {
-              inputKey: inputValue
-            }
+            annotations: (
+              [inputKey, inputValue]
+            )
           }
         }),
       };
