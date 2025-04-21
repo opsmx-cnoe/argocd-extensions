@@ -60,7 +60,7 @@
         React.createElement('input', {
           type: 'text',
           value: inputKey,
-          onChange: (e) => setInputValue(e.target.value),
+          onChange: (e) => setInputKey(e.target.value),
           style: {
             padding: '5px',
             width: '100%',
