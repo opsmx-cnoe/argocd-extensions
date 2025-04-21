@@ -3,18 +3,19 @@
 
   const flyout = (context) => {
     const app = context?.application;
+    const [inputKey, setInputKey] = React.useState('');
     const [inputValue, setInputValue] = React.useState('');
     const [statusMessage, setStatusMessage] = React.useState('');
 
     const submitAnnotation = async () => {
-      if (!inputValue || !app) return;
+      if (!inputKey || !inputValue || !app) return;
     
       const patchObject = {
         patchType: "merge",
         patch: JSON.stringify({
           metadata: {
             annotations: {
-              utkarshannotation: inputValue
+              inputKey: inputValue
             }
           }
         }),
@@ -55,7 +56,20 @@
         boxShadow: '4px 4px 0px #00000055',
       },
       children: [
-        React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation value:'),
+        React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation key:'),
+        React.createElement('input', {
+          type: 'text',
+          value: inputKey,
+          onChange: (e) => setInputValue(e.target.value),
+          style: {
+            padding: '5px',
+            width: '100%',
+            marginBottom: '10px',
+            borderRadius: '10px',
+            border: '2px solid #ff69b4',
+            fontFamily: "'Comic Sans MS', cursive, sans-serif",
+          },
+        }),
         React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation value:'),
         React.createElement('input', {
           type: 'text',
