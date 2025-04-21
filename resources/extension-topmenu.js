@@ -3,19 +3,19 @@
 
   const flyout = (context) => {
     const app = context?.application;
-    const [inputKey, setInputKey] = React.useState('');
     const [inputValue, setInputValue] = React.useState('');
     const [statusMessage, setStatusMessage] = React.useState('');
 
     const submitAnnotation = async () => {
-      if (!inputKey || !inputValue || !app) return;
+      if (!inputValue || !app) return;
     
+      //Add annotation
       const patchObject = {
         patchType: "merge",
         patch: JSON.stringify({
           metadata: {
             annotations: {
-              [inputKey]: inputValue
+              "ServiceNowID": inputValue
             }
           }
         }),
@@ -23,7 +23,7 @@
 
       try {
         const res = await fetch(
-          `/api/v1/applications/configmap`,
+          `/api/v1/applications/`+app.metadata.name,
           {
             method: 'PATCH',
             headers: {
@@ -56,21 +56,7 @@
         boxShadow: '4px 4px 0px #00000055',
       },
       children: [
-        React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation key:'),
-        React.createElement('input', {
-          type: 'text',
-          value: inputKey,
-          onChange: (e) => setInputKey(e.target.value),
-          style: {
-            padding: '5px',
-            width: '100%',
-            marginBottom: '10px',
-            borderRadius: '10px',
-            border: '2px solid #ff69b4',
-            fontFamily: "'Comic Sans MS', cursive, sans-serif",
-          },
-        }),
-        React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter annotation value:'),
+        React.createElement('div', { style: { marginBottom: '10px' } }, 'Enter service now id:'),
         React.createElement('input', {
           type: 'text',
           value: inputValue,
