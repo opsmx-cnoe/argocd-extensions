@@ -19,34 +19,29 @@
           }
         }),
       };
-      
-      // try {
-      //   const res = await fetch(
-      //     `/api/v1/applications/configmap`,
-      //     {
-      //       method: 'PATCH',
-      //       headers: {
-      //         'Content-Type': 'application/json',
-      //       },
-      //       body: JSON.stringify(patch),
-      //     }
-      //   );
+
+      try {
+        const res = await fetch(
+          `/api/v1/applications/configmap`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(patchObject),
+          }
+        );
     
-      //   const responseText = await res.text(); // Read the response body
+        const responseText = await res.text(); // Read the response body
     
-      //   if (res.ok) {
-      //     setStatusMessage('✅ Annotation added!');
-      //   } else {
-      //     setStatusMessage(`❌ Failed to add annotation:\n${responseText}`);
-      //   }
-      // } catch (err) {
-      //   setStatusMessage(`❌ Error occurred: ${err.message}`);
-      // }
-      xhttp.open("PATCH","/api/v1/applications/configmap",false)
-      xhttp.setRequestHeader("Content-type", "application/json");
-      // xhttp.setRequestHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJhZG1pbjpsb2dpbiIsImV4cCI6MTc0NTA2NjkyMSwibmJmIjoxNzQ0OTgwNTIxLCJpYXQiOjE3NDQ5ODA1MjEsImp0aSI6IjI2OGI4MDIwLWU5NzMtNDZlZS04MTkwLWNlNjdjZjk5MjJhMCJ9.NUyLRZ0tSCabFQTFlBh72mExvU2URzPpKjo495dc7Uc");
-      xhttp.send("{\r\n    \"patch\": \"{\\\"metadata\\\": {\\\"annotations\\\": {\\\"tabledtop\\\": \\\"xcvbnm\\\"}}}\",\r\n    \"patchType\": \"merge\"\r\n  }")
-      setStatusMessage(xhttp.responseText);
+        if (res.ok) {
+          setStatusMessage('✅ Annotation added!');
+        } else {
+          setStatusMessage(`❌ Failed to add annotation:\n${responseText}`);
+        }
+      } catch (err) {
+        setStatusMessage(`❌ Error occurred: ${err.message}`);
+      }
     };
     
 
