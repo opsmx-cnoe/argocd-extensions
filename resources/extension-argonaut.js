@@ -89,14 +89,17 @@ const handleSend = (msg = null) => {
   })
     .then(res => res.json())
     .then(data => {
-      setMessages(prev => [...prev, { user: "Agent", text: data.reply || JSON.stringify(data) }]);
+      const output = data.output || {};
+      const comment = output.comment || JSON.stringify(data);
+      setMessages(prev => [...prev, { user: "Agent", text: comment }]);
 
-      if (data.method && data.url && data.method !== "None" && data.url !== "None") {
-        setApiRequest({
-          method: data.method,
-          url: data.url,
-          body: data.body !== "None" ? data.body : null
-        });
+      const method = output.method;
+      const url = output.url;
+      const body = output.body;
+      const shouldRun = output.shouldRun;
+
+      if (shouldRun && method && url && method !== "None" && url !== "None") {
+        setApiRequest({ method, url, body, comment });
       } else {
         setApiRequest(null);
       }
@@ -197,7 +200,8 @@ return React.createElement("div", { style: { padding: "20px", fontFamily: "sans-
       React.createElement("button", { onClick: () => handleSend() }, "Send"),
       apiRequest &&
         React.createElement("div", { style: { marginTop: "10px" } },
-          React.createElement("p", null, `Suggested: ${apiRequest.method} ${apiRequest.url}`),
+          React.createElement("p", null, `Action: ${apiRequest.comment || ""}`),
+          React.createElement("p", null, `${apiRequest.method} ${apiRequest.url}`),
           React.createElement("button", { onClick: runSuggestedRequest }, "Send Request")
         ),
       apiResponse &&
@@ -226,6 +230,7 @@ return React.createElement("div", { style: { padding: "20px", fontFamily: "sans-
   !selectedApp &&
     React.createElement("p", { style: { color: "gray" } }, "Select an app to start chatting.")
 );
+
 };
 
 window.extensionsAPI.registerSystemLevelExtension(
