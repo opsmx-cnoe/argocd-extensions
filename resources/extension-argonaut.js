@@ -1,7 +1,7 @@
 (() => {
 const flameIcon = "https://cdn-icons-png.flaticon.com/512/753/753345.png";
 const skullIcon = "https://cdn-icons-png.flaticon.com/512/2753/2753911.png";
-const backgroundImg = "https://images.unsplash.com/photo-1602474390217-4d91002c36db?auto=format&fit=crop&w=1950&q=80";
+const backgroundImg = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/18017641-678b-47ac-b9f0-cbfbbfcea8d0/d58pwxm-34fe5e28-99b0-4c20-8ad7-fad2a96f43b4.png/v1/fill/w_894,h_894,q_70,strp/stone_wall_texture_by_zagreb_dubrava_d58pwxm-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9OTAwIiwicGF0aCI6IlwvZlwvMTgwMTc2NDEtNjc4Yi00N2FjLWI5ZjAtY2JmYmJmY2VhOGQwXC9kNThwd3htLTM0ZmU1ZTI4LTk5YjAtNGMyMC04YWQ3LWZhZDJhOTZmNDNiNC5wbmciLCJ3aWR0aCI6Ijw9OTAwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.VqDs3PIEV8NxNjf2UDAreZ9DWwSSUxQ9ZXvsdHKHQhE";
 
 const ChatExtension = () => {
 const [apps, setApps] = React.useState([]);
@@ -157,13 +157,15 @@ return React.createElement("div", {
   React.createElement("h2", {
     style: {
       fontSize: "32px",
+    fontFamily: gothicFont,
       marginBottom: "20px",
       color: "#ffcc00",
       textShadow: "2px 2px 6px black"
     }
   }, "☠ Argo CD Chat Assistant ☠"),
 
-  React.createElement("div", { style: { marginBottom: "10px" } },
+  React.createElement("div", { style: { marginBottom: "10px", 
+    fontFamily: gothicFont } },
     React.createElement("label", {}, "🔥 Backend URL: "),
     React.createElement("input", {
       value: backendUrl,
@@ -171,6 +173,7 @@ return React.createElement("div", {
       style: {
         width: "60%",
         padding: "6px",
+    fontFamily: gothicFont,
         background: "#1a1614",
         color: textColor,
         border: `1px solid ${borderColor}`,
@@ -179,7 +182,8 @@ return React.createElement("div", {
     })
   ),
 
-  React.createElement("div", { style: { marginBottom: "10px" } },
+  React.createElement("div", { style: { marginBottom: "10px",
+    fontFamily: gothicFont } },
     React.createElement("label", {}, "⚔️ Select App: "),
     React.createElement("select", {
       value: selectedApp,
@@ -187,6 +191,7 @@ return React.createElement("div", {
       style: {
         padding: "6px",
         background: "#1a1614",
+    fontFamily: gothicFont,
         color: textColor,
         border: `1px solid ${borderColor}`,
         borderRadius: "4px"
@@ -197,13 +202,15 @@ return React.createElement("div", {
     )
   ),
 
-  loading && React.createElement("p", { style: { color: "#f80" } }, "🧠 Analyzing..."),
+  loading && React.createElement("p", { style: { color: "#f80",
+    fontFamily: gothicFont } }, "🧠 Analyzing..."),
 
   selectedApp && React.createElement("div", null,
     React.createElement("div", {
       style: {
         border: `1px solid ${borderColor}`,
         height: "300px",
+    fontFamily: gothicFont,
         overflowY: "auto",
         padding: "10px",
         marginBottom: "10px",
@@ -234,6 +241,7 @@ return React.createElement("div", {
         marginRight: "5px",
         padding: "8px",
         background: "#1a1614",
+    fontFamily: gothicFont,
         color: textColor,
         border: `1px solid ${borderColor}`,
         borderRadius: "6px",
@@ -247,6 +255,7 @@ return React.createElement("div", {
         background: buttonColor,
         color: "#fff",
         padding: "10px 16px",
+    fontFamily: gothicFont,
         borderRadius: "8px",
         border: `1px solid #700`,
         boxShadow: glow,
@@ -264,6 +273,7 @@ return React.createElement("div", {
           color: "#fff",
           padding: "6px 12px",
           borderRadius: "6px",
+    fontFamily: gothicFont,
           border: `1px solid ${borderColor}`,
           boxShadow: glow,
           marginRight: "10px",
@@ -278,6 +288,7 @@ return React.createElement("div", {
         padding: "10px",
         background: "rgba(0,0,0,0.6)",
         borderRadius: "6px",
+    fontFamily: gothicFont,
         whiteSpace: "pre-wrap",
         border: `1px solid ${borderColor}`
       }
@@ -287,6 +298,7 @@ return React.createElement("div", {
           onClick: sendOutputToAI,
           style: {
             background: "#b30000",
+    fontFamily: gothicFont,
             color: "#fff",
             padding: "8px 14px",
             borderRadius: "6px",
