@@ -1,4 +1,8 @@
 (() => {
+const flameIcon = "https://cdn-icons-png.flaticon.com/512/753/753345.png";
+const skullIcon = "https://cdn-icons-png.flaticon.com/512/2753/2753911.png";
+const backgroundImg = "https://images.unsplash.com/photo-1602474390217-4d91002c36db?auto=format&fit=crop&w=1950&q=80";
+
 const ChatExtension = () => {
 const [apps, setApps] = React.useState([]);
 const [selectedApp, setSelectedApp] = React.useState("");
@@ -7,20 +11,15 @@ const [input, setInput] = React.useState("");
 const [loading, setLoading] = React.useState(false);
 const [backendUrl, setBackendUrl] = React.useState("");
 const [apiRequest, setApiRequest] = React.useState(null);
-const [apiResponse, setApiResponse] = React.useState(null);
 const [appJson, setAppJson] = React.useState(null);
 const [counter, setCounterAppJson] = React.useState(new Map());
+const [apiOutput, setApiOutput] = React.useState(null);
 
 React.useEffect(() => {
   fetch(`${window.location.origin}/api/v1/applications`)
     .then(res => res.json())
-    .then(data => {
-      const names = data.items.map(item => item.metadata.name);
-      setApps(names);
-    })
-    .catch(err => {
-      console.error("Failed to fetch applications:", err);
-    });
+    .then(data => setApps(data.items.map(i => i.metadata.name)))
+    .catch(console.error);
 }, []);
 
 const isValidUrl = (url) => {
@@ -38,87 +37,65 @@ const handleAppChange = (e) => {
   setMessages([]);
   setInput("");
   setApiRequest(null);
-  setApiResponse(null);
-
+  setApiOutput(null);
   if (!isValidUrl(backendUrl)) {
-    alert("Please enter a valid backend URL.");
+    alert("Please enter a valid backend URL");
     return;
   }
 
   setLoading(true);
   fetch(`${window.location.origin}/api/v1/applications/${appName}`)
     .then(res => res.json())
-    .then(appData => {
-      setAppJson(appData);
-    })
+    .then(setAppJson)
     .catch(err => {
-      console.error("Failed to fetch app details:", err);
-      setMessages(prev => [...prev, { user: "Agent", text: "Error getting app data." }]);
+      console.error(err);
+      setMessages(m => [...m, { user: "Agent", text: "Error getting analysis." }]);
     })
     .finally(() => setLoading(false));
 };
 
-const handleSend = (msg = null) => {
-  const userInput = msg || input.trim();
-  if (!userInput) return;
+const handleSend = () => {
+  if (!input.trim()) return;
+  setMessages(m => [...m, { user: "You", text: input }]);
+  setInput("");
+  if (!isValidUrl(backendUrl)) return alert("Invalid backend URL");
 
-  setMessages(prev => [...prev, { user: "You", text: userInput }]);
-  if (!msg) setInput("");
-
-  if (!isValidUrl(backendUrl)) {
-    alert("Please enter a valid backend URL.");
-    return;
-  }
-
-  const firstTime = !counter.get(selectedApp);
-  const newCounter = new Map(counter);
-  newCounter.set(selectedApp, 1);
-  setCounterAppJson(newCounter);
-
-  const payload = {
-    message: userInput,
+  const isFirst = counter.get(selectedApp) == null;
+  const body = {
+    message: input,
     sessionId: selectedApp,
     application: selectedApp,
-    ...(firstTime && appJson ? { status: appJson.status, spec: appJson.spec } : {})
+    ...(isFirst && appJson ? { status: appJson.status, spec: appJson.spec } : {})
   };
 
   fetch(backendUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(body)
   })
     .then(res => res.json())
     .then(data => {
-      const output = data.output || {};
-      const comment = output.comment || JSON.stringify(data);
-      setMessages(prev => [...prev, { user: "Agent", text: comment }]);
-
-      const method = output.method;
-      const url = output.url;
-      const body = output.body;
-      const shouldRun = output.shouldRun;
-
-      if (shouldRun && method && url && method !== "None" && url !== "None") {
-        setApiRequest({ method, url, body, comment });
-      } else {
-        setApiRequest(null);
+      const out = data.output || {};
+      setMessages(m => [...m, { user: "Agent", text: out.comment || JSON.stringify(out) }]);
+      if (out.shouldRun && out.url && out.method) {
+        setApiRequest({ method: out.method, url: out.url, body: out.body });
+        setApiOutput(null);
+      }
+      if (isFirst) {
+        const newCounter = new Map(counter);
+        newCounter.set(selectedApp, 1);
+        setCounterAppJson(newCounter);
       }
     })
     .catch(err => {
-      console.error("Chat backend error:", err);
-      setMessages(prev => [...prev, { user: "Agent", text: "Error getting chat response." }]);
+      console.error(err);
+      setMessages(m => [...m, { user: "Agent", text: "Chat error." }]);
     });
 };
 
 const runSuggestedRequest = () => {
-  if (!apiRequest || !apiRequest.method || !apiRequest.url) {
-    alert("No valid API request to run.");
-    return;
-  }
-
-  const fullUrl = apiRequest.url.startsWith("http")
-    ? apiRequest.url
-    : `${window.location.origin}${apiRequest.url}`;
+  if (!apiRequest) return alert("No request");
+  const fullUrl = apiRequest.url.startsWith("http") ? apiRequest.url : `${window.location.origin}${apiRequest.url}`;
 
   fetch(fullUrl, {
     method: apiRequest.method,
@@ -126,194 +103,204 @@ const runSuggestedRequest = () => {
     body: apiRequest.body ? JSON.stringify(apiRequest.body) : null
   })
     .then(res => res.json())
-    .then(data => {
-      setApiResponse(data);
-    })
+    .then(data => setApiOutput(JSON.stringify(data, null, 2)))
     .catch(err => {
-      console.error("API request failed:", err);
-      setApiResponse({ error: "Request failed: " + err.message });
+      console.error(err);
+      setApiOutput("❌ Failed to send request.");
     });
 };
 
-const sendApiResponseToAgent = () => {
-  if (!apiResponse) return;
-  const responseString = typeof apiResponse === "string"
-    ? apiResponse
-    : JSON.stringify(apiResponse, null, 2);
-  handleSend(responseString);
+const sendOutputToAI = () => {
+  if (!apiOutput) return;
+  setMessages(m => [...m, { user: "You", text: apiOutput }]);
+  setApiOutput(null);
+  const body = {
+    message: apiOutput,
+    sessionId: selectedApp,
+    application: selectedApp,
+  };
+  fetch(backendUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  })
+    .then(res => res.json())
+    .then(data => {
+      const out = data.output || {};
+      setMessages(m => [...m, { user: "Agent", text: out.comment || JSON.stringify(out) }]);
+      if (out.shouldRun && out.url && out.method) {
+        setApiRequest({ method: out.method, url: out.url, body: out.body });
+        setApiOutput(null);
+      }
+    });
 };
 
-const gothicFont = { fontFamily: '"MedievalSharp", cursive' };
+const gothicFont = `'Fraktur', 'Cinzel Decorative', 'MedievalSharp', serif`;
+const baseColor = "#0f0e0e";
+const textColor = "#fdf1cf";
+const borderColor = "#3e2f1c";
+const buttonColor = "#a92f2f";
+const glow = "0 0 10px #dba400, 0 0 20px #dba400";
 
-const styles = {
-  container: {
+return React.createElement("div", {
+  style: {
     padding: "20px",
-    backgroundColor: "#1b1b1b",
-    color: "#f2e6d9",
-    ...gothicFont,
-  },
-  section: {
-    marginBottom: "15px"
-  },
-  label: {
-    marginRight: "10px",
-    fontSize: "18px"
-  },
-  input: {
-    backgroundColor: "#2c2c2c",
-    color: "#fff",
-    border: "1px solid #7f1d1d",
-    padding: "10px",
-    fontSize: "16px",
-    borderRadius: "5px",
-    width: "60%"
-  },
-  textarea: {
-    width: "80%",
-    height: "80px",
-    backgroundColor: "#2c2c2c",
-    color: "#f9f6f2",
-    padding: "10px",
-    border: "1px solid #7f1d1d",
-    borderRadius: "6px",
-    fontSize: "16px",
-    ...gothicFont
-  },
-  button: {
-    backgroundColor: "#7f1d1d",
-    color: "#fcebb2",
-    border: "none",
-    padding: "10px 15px",
-    marginLeft: "5px",
-    borderRadius: "6px",
-    fontSize: "16px",
-    cursor: "pointer",
-    boxShadow: "0 0 10px #a83232"
-  },
-  select: {
-    padding: "6px",
-    backgroundColor: "#2c2c2c",
-    color: "#f9f6f2",
-    border: "1px solid #7f1d1d",
-    borderRadius: "6px",
-    fontSize: "16px"
-  },
-  chatBox: {
-    border: "1px solid #5c1a1a",
-    height: "300px",
-    overflowY: "auto",
-    padding: "10px",
-    marginBottom: "10px",
-    backgroundColor: "#2a1a1a",
-    borderRadius: "6px"
-  },
-  message: {
-    marginBottom: "8px",
-    padding: "6px",
-    borderRadius: "4px",
-    backgroundColor: "#381313"
-  },
-  agentMessage: {
-    backgroundColor: "#222",
-    color: "#fcebb2"
-  },
-  responseBox: {
-    marginTop: "15px",
-    padding: "10px",
-    border: "1px solid #444",
-    backgroundColor: "#1e1e1e",
-    color: "#f2f2f2",
-    maxHeight: "200px",
-    overflowY: "auto",
-    whiteSpace: "pre-wrap",
-    fontFamily: "monospace",
-    borderRadius: "6px"
+    fontFamily: gothicFont,
+    color: textColor,
+    backgroundColor: baseColor,
+    backgroundImage: `url(${backgroundImg})`,
+    backgroundSize: "cover",
+    minHeight: "100vh",
+    textShadow: "1px 1px 2px black"
   }
-};
+},
+  React.createElement("h2", {
+    style: {
+      fontSize: "32px",
+      marginBottom: "20px",
+      color: "#ffcc00",
+      textShadow: "2px 2px 6px black"
+    }
+  }, "☠ Argo CD Chat Assistant ☠"),
 
-return React.createElement("div", { style: styles.container },
-  React.createElement("h2", null, "🧙 Argo CD Chat Assistant"),
-  React.createElement("div", { style: styles.section },
-    React.createElement("label", { htmlFor: "backendUrl", style: styles.label }, "Backend URL:"),
+  React.createElement("div", { style: { marginBottom: "10px" } },
+    React.createElement("label", {}, "🔥 Backend URL: "),
     React.createElement("input", {
-      type: "text",
-      id: "backendUrl",
       value: backendUrl,
       onChange: e => setBackendUrl(e.target.value),
-      placeholder: "https://your-backend/api/analyze",
-      style: styles.input
+      style: {
+        width: "60%",
+        padding: "6px",
+        background: "#1a1614",
+        color: textColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: "4px"
+      }
     })
   ),
-  React.createElement("div", { style: styles.section },
-    React.createElement("label", { htmlFor: "appSelect", style: styles.label }, "Select Application:"),
+
+  React.createElement("div", { style: { marginBottom: "10px" } },
+    React.createElement("label", {}, "⚔️ Select App: "),
     React.createElement("select", {
-      id: "appSelect",
       value: selectedApp,
       onChange: handleAppChange,
-      style: styles.select
+      style: {
+        padding: "6px",
+        background: "#1a1614",
+        color: textColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: "4px"
+      }
     },
       React.createElement("option", { value: "" }, "-- Choose --"),
       apps.map(app => React.createElement("option", { key: app, value: app }, app))
     )
   ),
-  loading &&
-    React.createElement("p", { style: { color: "#f59e0b" } }, "Summoning application..."),
-  selectedApp &&
-    React.createElement("div", null,
-      React.createElement("div", { style: styles.chatBox },
-        messages.map((msg, idx) =>
-          React.createElement("div", {
-            key: idx,
-            style: {
-              ...styles.message,
-              ...(msg.user === "Agent" ? styles.agentMessage : {})
-            }
-          },
-            React.createElement("strong", null, `${msg.user}: `),
-            msg.text
-          )
-        )
-      ),
-      React.createElement("textarea", {
-        value: input,
-        onChange: e => setInput(e.target.value),
-        placeholder: "Speak, mortal...",
-        style: styles.textarea
-      }),
-      React.createElement("button", { onClick: () => handleSend(), style: styles.button }, "Send"),
-      apiRequest &&
-        React.createElement("div", { style: styles.section },
-          React.createElement("p", null, `🛠️ ${apiRequest.comment || ""}`),
-          React.createElement("p", null, `${apiRequest.method} ${apiRequest.url}`),
-          React.createElement("button", { onClick: runSuggestedRequest, style: styles.button }, "Send Request")
-        ),
-      apiResponse &&
-        React.createElement("div", { style: styles.responseBox },
-          React.createElement("strong", null, "🧾 API Response:\n"),
-          typeof apiResponse === "string"
-            ? apiResponse
-            : JSON.stringify(apiResponse, null, 2)
-        ),
-      apiResponse &&
-        React.createElement("button", { onClick: sendApiResponseToAgent, style: styles.button }, "Send to AI")
-    ),
-  !selectedApp &&
-    React.createElement("p", { style: { color: "#bbb" } }, "Select an application to begin your quest.")
-);
 
+  loading && React.createElement("p", { style: { color: "#f80" } }, "🧠 Analyzing..."),
+
+  selectedApp && React.createElement("div", null,
+    React.createElement("div", {
+      style: {
+        border: `1px solid ${borderColor}`,
+        height: "300px",
+        overflowY: "auto",
+        padding: "10px",
+        marginBottom: "10px",
+        backgroundColor: "rgba(0,0,0,0.6)"
+      }
+    },
+      messages.map((msg, idx) =>
+        React.createElement("div", { key: idx, style: { marginBottom: "8px", display: "flex", alignItems: "center" } },
+          React.createElement("img", {
+            src: msg.user === "Agent" ? skullIcon : flameIcon,
+            style: { width: "20px", height: "20px", marginRight: "6px" }
+          }),
+          React.createElement("strong", null, `${msg.user}: `),
+          msg.text
+        )
+      )
+    ),
+
+    React.createElement("textarea", {
+      value: input,
+      onChange: (e) => setInput(e.target.value),
+      onKeyDown: (e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend()),
+      placeholder: "Speak your will...",
+      rows: 3,
+      style: {
+        width: "80%",
+        height: "70px",
+        marginRight: "5px",
+        padding: "8px",
+        background: "#1a1614",
+        color: textColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: "6px",
+        resize: "none"
+      }
+    }),
+
+    React.createElement("button", {
+      onClick: handleSend,
+      style: {
+        background: buttonColor,
+        color: "#fff",
+        padding: "10px 16px",
+        borderRadius: "8px",
+        border: `1px solid #700`,
+        boxShadow: glow,
+        fontWeight: "bold",
+        cursor: "pointer"
+      }
+    }, "💬 Send"),
+
+    apiRequest && React.createElement("div", { style: { marginTop: "10px" } },
+      React.createElement("p", null, `📜 Suggested: ${apiRequest.method} ${apiRequest.url}`),
+      React.createElement("button", {
+        onClick: runSuggestedRequest,
+        style: {
+          background: "#6a4d21",
+          color: "#fff",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          border: `1px solid ${borderColor}`,
+          boxShadow: glow,
+          marginRight: "10px",
+          cursor: "pointer"
+        }
+      }, "🔥 Send Request")
+    ),
+
+    apiOutput && React.createElement("div", {
+      style: {
+        marginTop: "10px",
+        padding: "10px",
+        background: "rgba(0,0,0,0.6)",
+        borderRadius: "6px",
+        whiteSpace: "pre-wrap",
+        border: `1px solid ${borderColor}`
+      }
+    }, apiOutput,
+      React.createElement("div", { style: { marginTop: "8px" } },
+        React.createElement("button", {
+          onClick: sendOutputToAI,
+          style: {
+            background: "#b30000",
+            color: "#fff",
+            padding: "8px 14px",
+            borderRadius: "6px",
+            border: `1px solid ${borderColor}`,
+            boxShadow: glow,
+            cursor: "pointer"
+          }
+        }, "⚡ Send to AI")
+      )
+    )
+  )
+);
 
 };
 
-// Inject gothic font if not present
-const link = document.createElement("link");
-link.href = "https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap";
-link.rel = "stylesheet";
-document.head.appendChild(link);
-
-window.extensionsAPI.registerSystemLevelExtension(
-ChatExtension,
-"Chat",
-"/chat",
-"fa-comments"
-);
+window.extensionsAPI.registerSystemLevelExtension(ChatExtension, "Chat", "/chat", "fa-comments");
 })();
