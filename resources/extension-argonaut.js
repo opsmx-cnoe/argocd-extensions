@@ -153,9 +153,162 @@ const sendOutputToAI = () => {
 
 // (The rest of the UI rendering stays unchanged from the previous version)
 
-return (
-  // Same JSX code as earlier version — omitted here for brevity
-  // You can paste the rendering part from previous version without change
+return React.createElement("div", {
+  style: {
+    padding: "20px",
+    fontFamily: gothicFont,
+    color: textColor,
+    backgroundColor: baseColor,
+    backgroundImage: `url(${backgroundImg})`,
+    backgroundSize: "cover",
+    minHeight: "100vh",
+    textShadow: "1px 1px 2px black"
+  }
+},
+  React.createElement("h2", {
+    style: {
+      fontSize: "32px",
+      marginBottom: "20px",
+      color: "#ffcc00",
+      textShadow: "2px 2px 6px black"
+    }
+  }, "☠ Argo CD Chat Assistant ☠"),
+
+  React.createElement("div", { style: { marginBottom: "10px" } },
+    React.createElement("label", {}, "🔥 Backend URL: "),
+    React.createElement("input", {
+      value: backendUrl,
+      onChange: e => setBackendUrl(e.target.value),
+      style: {
+        width: "60%",
+        padding: "6px",
+        background: "#1a1614",
+        color: textColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: "4px"
+      }
+    })
+  ),
+
+  React.createElement("div", { style: { marginBottom: "10px" } },
+    React.createElement("label", {}, "⚔️ Select App: "),
+    React.createElement("select", {
+      value: selectedApp,
+      onChange: handleAppChange,
+      style: {
+        padding: "6px",
+        background: "#1a1614",
+        color: textColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: "4px"
+      }
+    },
+      React.createElement("option", { value: "" }, "-- Choose --"),
+      apps.map(app => React.createElement("option", { key: app, value: app }, app))
+    )
+  ),
+
+  loading && React.createElement("p", { style: { color: "#f80" } }, "🧠 Analyzing..."),
+
+  selectedApp && React.createElement("div", null,
+    React.createElement("div", {
+      style: {
+        border: `1px solid ${borderColor}`,
+        height: "300px",
+        overflowY: "auto",
+        padding: "10px",
+        marginBottom: "10px",
+        backgroundColor: "rgba(0,0,0,0.6)"
+      }
+    },
+      messages.map((msg, idx) =>
+        React.createElement("div", { key: idx, style: { marginBottom: "8px", display: "flex", alignItems: "center" } },
+          React.createElement("img", {
+            src: msg.user === "Agent" ? skullIcon : flameIcon,
+            style: { width: "20px", height: "20px", marginRight: "6px" }
+          }),
+          React.createElement("strong", null, `${msg.user}: `),
+          msg.text
+        )
+      )
+    ),
+
+    React.createElement("textarea", {
+      value: input,
+      onChange: (e) => setInput(e.target.value),
+      onKeyDown: (e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend()),
+      placeholder: "Speak your will...",
+      rows: 3,
+      style: {
+        width: "80%",
+        height: "70px",
+        marginRight: "5px",
+        padding: "8px",
+        background: "#1a1614",
+        color: textColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: "6px",
+        resize: "none"
+      }
+    }),
+
+    React.createElement("button", {
+      onClick: handleSend,
+      style: {
+        background: buttonColor,
+        color: "#fff",
+        padding: "10px 16px",
+        borderRadius: "8px",
+        border: `1px solid #700`,
+        boxShadow: glow,
+        fontWeight: "bold",
+        cursor: "pointer"
+      }
+    }, "💬 Send"),
+
+    apiRequest && React.createElement("div", { style: { marginTop: "10px" } },
+      React.createElement("p", null, `📜 Suggested: ${apiRequest.method} ${apiRequest.url}`),
+      React.createElement("button", {
+        onClick: runSuggestedRequest,
+        style: {
+          background: "#6a4d21",
+          color: "#fff",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          border: `1px solid ${borderColor}`,
+          boxShadow: glow,
+          marginRight: "10px",
+          cursor: "pointer"
+        }
+      }, "🔥 Send Request")
+    ),
+
+    apiOutput && React.createElement("div", {
+      style: {
+        marginTop: "10px",
+        padding: "10px",
+        background: "rgba(0,0,0,0.6)",
+        borderRadius: "6px",
+        whiteSpace: "pre-wrap",
+        border: `1px solid ${borderColor}`
+      }
+    }, apiOutput,
+      React.createElement("div", { style: { marginTop: "8px" } },
+        React.createElement("button", {
+          onClick: sendOutputToAI,
+          style: {
+            background: "#b30000",
+            color: "#fff",
+            padding: "8px 14px",
+            borderRadius: "6px",
+            border: `1px solid ${borderColor}`,
+            boxShadow: glow,
+            cursor: "pointer"
+          }
+        }, "⚡ Send to AI")
+      )
+    )
+  )
 );
 };
 
