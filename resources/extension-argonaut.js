@@ -16,6 +16,7 @@
     const [apiOutput, setApiOutput] = React.useState(null);
     const [username, setUsername] = React.useState("");
     const [sessionId, setSessionId] = React.useState("");
+    const [apiSuccess, setApiSuccess] = React.useState(false);
 
     React.useEffect(() => {
       fetch(`${window.location.origin}/api/v1/applications`)
@@ -23,7 +24,6 @@
         .then(data => setApps(data.items.map(i => i.metadata.name)))
         .catch(console.error);
 
-      // Fetch username
       fetch(`${window.location.origin}/api/v1/session/userinfo`)
         .then(res => res.json())
         .then(data => setUsername(data.username || "unknown"))
@@ -78,7 +78,12 @@
         message: input,
         sessionId: sessionId,
         application: selectedApp,
-        ...(isFirst && appJson ? { status: appJson.status, spec: appJson.spec } : {})
+        ...(isFirst && appJson ? {
+          appData: {
+            status: appJson.status,
+            spec: appJson.spec
+          }
+        } : {})
       };
 
       fetch(backendUrl, {
@@ -116,9 +121,14 @@
         body: apiRequest.body ? JSON.stringify(apiRequest.body) : null
       })
         .then(res => res.json())
-        .then(data => setApiOutput(JSON.stringify(data, null, 2)))
+        .then(data => 
+          {
+            setApiOutput(JSON.stringify(data, null, 2));
+            setApiSuccess(true);
+          })
         .catch(err => {
           console.error(err);
+          setApiSuccess(false);
           setApiOutput("❌ Failed to send request.");
         });
     };
@@ -129,9 +139,14 @@
       setApiOutput(null);
 
       const body = {
-        message: apiOutput,
+        message: apiSuccess
+        ? "I executed the API in my browser successfully."
+        : "I executed the API in my browser unsuccessfully.",
         sessionId: sessionId,
         application: selectedApp,
+        appData: {
+          apiResult: apiOutput
+        }
       };
 
       fetch(backendUrl, {
