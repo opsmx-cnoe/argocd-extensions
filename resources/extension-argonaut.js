@@ -103,11 +103,11 @@
             setApiRequest({ method: out.method, url: out.url, body: out.body });
             setApiOutput(null);
           }
-          if (isFirst) {
-            const newCounter = new Map(counter);
-            newCounter.set(selectedApp, 1);
-            setCounterAppJson(newCounter);
-          }
+          // if (isFirst) {
+          //   const newCounter = new Map(counter);
+          //   newCounter.set(selectedApp, 1);
+          //   setCounterAppJson(newCounter);
+          // }
         })
         .catch(err => {
           console.error(err);
