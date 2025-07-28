@@ -12,7 +12,7 @@
     const [backendUrl, setBackendUrl] = React.useState("");
     const [apiRequest, setApiRequest] = React.useState(null);
     const [appJson, setAppJson] = React.useState(null);
-    const [counter, setCounterAppJson] = React.useState(new Map());
+    // const [counter, setCounterAppJson] = React.useState(new Map());
     const [apiOutput, setApiOutput] = React.useState(null);
     const [username, setUsername] = React.useState("");
     const [sessionId, setSessionId] = React.useState("");
@@ -73,17 +73,21 @@
       setInput("");
       if (!isValidUrl(backendUrl)) return alert("Invalid backend URL");
 
-      const isFirst = counter.get(selectedApp) == null;
+      // const isFirst = counter.get(selectedApp) == null;
       const body = {
         message: input,
         sessionId: sessionId,
         application: selectedApp,
-        ...(isFirst && appJson ? {
-          appData: {
+        appData: {
             status: appJson.status,
             spec: appJson.spec
           }
-        } : {})
+        // ...(isFirst && appJson ? {
+        //   appData: {
+        //     status: appJson.status,
+        //     spec: appJson.spec
+        //   }
+        // } : {})
       };
 
       fetch(backendUrl, {
@@ -134,14 +138,15 @@
     };
 
     const sendOutputToAI = () => {
+      const userMessage = apiSuccess
+        ? "I executed the API in my browser successfully."
+        : "I executed the API in my browser unsuccessfully.";
       if (!apiOutput) return;
-      setMessages(m => [...m, { user: "You", text: apiOutput }]);
+      setMessages(m => [...m, { user: "You", text: userMessage }]);
       setApiOutput(null);
 
       const body = {
-        message: apiSuccess
-        ? "I executed the API in my browser successfully."
-        : "I executed the API in my browser unsuccessfully.",
+        message: userMessage,
         sessionId: sessionId,
         application: selectedApp,
         appData: {
