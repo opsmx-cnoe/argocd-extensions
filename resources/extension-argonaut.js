@@ -1,7 +1,4 @@
 (() => {
-  const flameIcon = "https://cdn-icons-png.flaticon.com/512/753/753345.png";
-  const skullIcon = "https://cdn-icons-png.flaticon.com/512/2753/2753911.png";
-  const backgroundImg = "https://images.unsplash.com/photo-1602474390217-4d91002c36db?auto=format&fit=crop&w=1950&q=80";
 
   const ChatExtension = () => {
     const [apps, setApps] = React.useState([]);
@@ -12,7 +9,6 @@
     const [backendUrl, setBackendUrl] = React.useState("");
     const [apiRequest, setApiRequest] = React.useState(null);
     const [appJson, setAppJson] = React.useState(null);
-    // const [counter, setCounterAppJson] = React.useState(new Map());
     const [apiOutput, setApiOutput] = React.useState(null);
     const [username, setUsername] = React.useState("");
     const [sessionId, setSessionId] = React.useState("");
@@ -44,7 +40,6 @@
       const timestamp = Math.floor(Date.now() / 1000);
       const sid = `${username}_${timestamp}`;
       setSessionId(sid);
-
       setSelectedApp(appName);
       setMessages([]);
       setInput("");
@@ -73,21 +68,14 @@
       setInput("");
       if (!isValidUrl(backendUrl)) return alert("Invalid backend URL");
 
-      // const isFirst = counter.get(selectedApp) == null;
       const body = {
         message: input,
         sessionId: sessionId,
         application: selectedApp,
         appData: {
-            status: appJson.status,
-            spec: appJson.spec
-          }
-        // ...(isFirst && appJson ? {
-        //   appData: {
-        //     status: appJson.status,
-        //     spec: appJson.spec
-        //   }
-        // } : {})
+          status: appJson.status,
+          spec: appJson.spec
+        }
       };
 
       fetch(backendUrl, {
@@ -103,11 +91,6 @@
             setApiRequest({ method: out.method, url: out.url, body: out.body });
             setApiOutput(null);
           }
-          // if (isFirst) {
-          //   const newCounter = new Map(counter);
-          //   newCounter.set(selectedApp, 1);
-          //   setCounterAppJson(newCounter);
-          // }
         })
         .catch(err => {
           console.error(err);
@@ -125,11 +108,10 @@
         body: apiRequest.body ? JSON.stringify(apiRequest.body) : null
       })
         .then(res => res.json())
-        .then(data => 
-          {
-            setApiOutput(JSON.stringify(data, null, 2));
-            setApiSuccess(true);
-          })
+        .then(data => {
+          setApiOutput(JSON.stringify(data, null, 2));
+          setApiSuccess(true);
+        })
         .catch(err => {
           console.error(err);
           setApiSuccess(false);
@@ -139,7 +121,7 @@
 
     const sendOutputToAI = () => {
       const userMessage = apiSuccess
-        ? "I executed the API in my browser successfully."
+        ? "I executed the API in my browser successfully and have sent you the response. Please analyze the API response."
         : "I executed the API in my browser unsuccessfully.";
       if (!apiOutput) return;
       setMessages(m => [...m, { user: "You", text: userMessage }]);
@@ -170,90 +152,101 @@
         });
     };
 
-    const gothicFont = `'Fraktur', 'Cinzel Decorative', 'MedievalSharp', serif`;
-    const baseColor = "#0f0e0e";
-    const textColor = "#fdf1cf";
-    const borderColor = "#3e2f1c";
-    const buttonColor = "#a92f2f";
-    const glow = "0 0 10px #dba400, 0 0 20px #dba400";
-
-    return React.createElement("div", {
-      style: {
-        padding: "20px",
-        fontFamily: gothicFont,
-        color: textColor,
-        backgroundColor: baseColor,
-        backgroundImage: `url(${backgroundImg})`,
-        backgroundSize: "cover",
-        minHeight: "100vh",
-        textShadow: "1px 1px 2px black"
-      }
-    },
-      React.createElement("h2", {
-        style: {
-          fontSize: "32px",
-          marginBottom: "20px",
-          color: "#ffcc00",
-          textShadow: "2px 2px 6px black"
+    return React.createElement("div", { className: "chat-container" },
+      React.createElement("style", {}, `
+        .chat-container {
+          padding: 20px;
+          font-family: Arial, sans-serif;
+          color: #002244;
+          background-color: #fffbea;
+          min-height: 100vh;
         }
-      }, "☠ Argo CD Chat Assistant ☠"),
+        .chat-title {
+          font-size: 28px;
+          margin-bottom: 20px;
+          color: #0047ab;
+        }
+        .chat-input, .chat-select, .chat-textarea {
+          padding: 8px;
+          border: 1px solid #0047ab;
+          border-radius: 4px;
+          margin-bottom: 10px;
+          width: 60%;
+        }
+        .chat-select {
+          width: auto;
+        }
+        .chat-textarea {
+          width: 80%;
+          height: 70px;
+          resize: none;
+        }
+        .chat-button {
+          background-color: #ffcc00;
+          color: #002244;
+          border: none;
+          padding: 10px 16px;
+          margin-left: 5px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+        .chat-box {
+          border: 1px solid #ccc;
+          height: 300px;
+          overflow-y: auto;
+          padding: 10px;
+          margin-bottom: 10px;
+          background: #f0f8ff;
+        }
+        .chat-message {
+          display: flex;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        .chat-message img {
+          width: 20px;
+          height: 20px;
+          margin-right: 6px;
+        }
+        .chat-response {
+          background: #e6f2ff;
+          padding: 10px;
+          border-radius: 6px;
+          white-space: pre-wrap;
+          border: 1px solid #0047ab;
+          margin-top: 10px;
+        }
+      `),
+      React.createElement("h2", { className: "chat-title" }, "💬 Argo CD Chat Assistant"),
 
-      React.createElement("div", { style: { marginBottom: "10px" } },
-        React.createElement("label", {}, "🔥 Backend URL: "),
+      React.createElement("div", null,
+        React.createElement("label", null, "🔗 Backend URL: "),
         React.createElement("input", {
+          className: "chat-input",
           value: backendUrl,
-          onChange: e => setBackendUrl(e.target.value),
-          style: {
-            width: "60%",
-            padding: "6px",
-            background: "#1a1614",
-            color: textColor,
-            border: `1px solid ${borderColor}`,
-            borderRadius: "4px"
-          }
+          onChange: e => setBackendUrl(e.target.value)
         })
       ),
 
-      React.createElement("div", { style: { marginBottom: "10px" } },
-        React.createElement("label", {}, "⚔️ Select App: "),
+      React.createElement("div", null,
+        React.createElement("label", null, "📦 Select App: "),
         React.createElement("select", {
+          className: "chat-select",
           value: selectedApp,
-          onChange: handleAppChange,
-          style: {
-            padding: "6px",
-            background: "#1a1614",
-            color: textColor,
-            border: `1px solid ${borderColor}`,
-            borderRadius: "4px"
-          }
+          onChange: handleAppChange
         },
           React.createElement("option", { value: "" }, "-- Choose --"),
           apps.map(app => React.createElement("option", { key: app, value: app }, app))
         )
       ),
 
-      loading && React.createElement("p", { style: { color: "#f80" } }, "🧠 Analyzing..."),
+      loading && React.createElement("p", null, "⏳ Analyzing..."),
 
       selectedApp && React.createElement("div", null,
-        React.createElement("div", {
-          style: {
-            border: `1px solid ${borderColor}`,
-            height: "300px",
-            overflowY: "auto",
-            padding: "10px",
-            marginBottom: "10px",
-            backgroundColor: "rgba(0,0,0,0.6)"
-          }
-        },
+        React.createElement("div", { className: "chat-box" },
           messages.map((msg, idx) =>
-            React.createElement("div", {
-              key: idx,
-              style: { marginBottom: "8px", display: "flex", alignItems: "center" }
-            },
-              React.createElement("img", {
-                src: msg.user === "Agent" ? skullIcon : flameIcon,
-                style: { width: "20px", height: "20px", marginRight: "6px" }
-              }),
+            React.createElement("div", { key: idx, className: "chat-message" },
               React.createElement("strong", null, `${msg.user}: `),
               msg.text
             )
@@ -261,78 +254,31 @@
         ),
 
         React.createElement("textarea", {
+          className: "chat-textarea",
           value: input,
-          onChange: (e) => setInput(e.target.value),
-          onKeyDown: (e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend()),
-          placeholder: "Speak your will...",
-          rows: 3,
-          style: {
-            width: "80%",
-            height: "70px",
-            marginRight: "5px",
-            padding: "8px",
-            background: "#1a1614",
-            color: textColor,
-            border: `1px solid ${borderColor}`,
-            borderRadius: "6px",
-            resize: "none"
-          }
+          onChange: e => setInput(e.target.value),
+          onKeyDown: e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())
         }),
 
         React.createElement("button", {
-          onClick: handleSend,
-          style: {
-            background: buttonColor,
-            color: "#fff",
-            padding: "10px 16px",
-            borderRadius: "8px",
-            border: `1px solid #700`,
-            boxShadow: glow,
-            fontWeight: "bold",
-            cursor: "pointer"
-          }
-        }, "💬 Send"),
+          className: "chat-button",
+          onClick: handleSend
+        }, "Send"),
 
-        apiRequest && React.createElement("div", { style: { marginTop: "10px" } },
+        apiRequest && React.createElement("div", null,
           React.createElement("p", null, `📜 Suggested: ${apiRequest.method} ${apiRequest.url}`),
           React.createElement("button", {
-            onClick: runSuggestedRequest,
-            style: {
-              background: "#6a4d21",
-              color: "#fff",
-              padding: "6px 12px",
-              borderRadius: "6px",
-              border: `1px solid ${borderColor}`,
-              boxShadow: glow,
-              marginRight: "10px",
-              cursor: "pointer"
-            }
-          }, "🔥 Send Request")
+            className: "chat-button",
+            onClick: runSuggestedRequest
+          }, "Run API")
         ),
 
-        apiOutput && React.createElement("div", {
-          style: {
-            marginTop: "10px",
-            padding: "10px",
-            background: "rgba(0,0,0,0.6)",
-            borderRadius: "6px",
-            whiteSpace: "pre-wrap",
-            border: `1px solid ${borderColor}`
-          }
-        }, apiOutput,
-          React.createElement("div", { style: { marginTop: "8px" } },
+        apiOutput && React.createElement("div", { className: "chat-response" }, apiOutput,
+          React.createElement("div", null,
             React.createElement("button", {
-              onClick: sendOutputToAI,
-              style: {
-                background: "#b30000",
-                color: "#fff",
-                padding: "8px 14px",
-                borderRadius: "6px",
-                border: `1px solid ${borderColor}`,
-                boxShadow: glow,
-                cursor: "pointer"
-              }
-            }, "⚡ Send to AI")
+              className: "chat-button",
+              onClick: sendOutputToAI
+            }, "Send Output to AI")
           )
         )
       )
