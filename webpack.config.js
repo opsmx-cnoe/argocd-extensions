@@ -2,14 +2,10 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: '/resources/extension-argonaut.js',
+  entry: './resources/extension-argonaut.js',
   output: {
     path: path.resolve(__dirname, 'asset/resources'),
-    filename: 'extension-argonaut.js', // overwrite existing file
-    library: {
-      type: 'var',
-      name: 'ExtensionArgonaut'
-    }
+    filename: 'extension-argonaut.js', 
   },
   module: {
     rules: [
@@ -20,11 +16,15 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'] // inlines CSS into JS
+        use: ['style-loader', 'css-loader']
       }
     ]
   },
   resolve: {
     extensions: ['.js', '.jsx']
+  },
+  externals: {
+  react: "React",
+  "react-dom": "ReactDOM"
   }
 };
