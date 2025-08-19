@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import "./AIchatbot.css";
+import  { useEffect, useState } from "react";
+import "./Aichatbot.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -222,7 +222,7 @@ const AIchatbot = () => {
           <div className="ai-chat-footer">
             <textarea
               className="ai-chat-textarea"
-              placeholder="Type your message..."
+              placeholder="Ask anything"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
