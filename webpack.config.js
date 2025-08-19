@@ -2,17 +2,29 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: './resources/extension-argonaut.js',
+  entry:  path.resolve(__dirname, 'resources/extension-argonaut.js'), 
   output: {
-    path: path.resolve(__dirname, 'asset/resources'),
+    path: path.resolve(__dirname, 'dist'),
     filename: 'extension-argonaut.js', 
+    library: {
+      type: 'var',
+      name: 'ExtensionArgonaut'
+    }
   },
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',   
+              '@babel/preset-react'  
+            ]
+          }
+        }
       },
       {
         test: /\.css$/i,
@@ -24,7 +36,7 @@ module.exports = {
     extensions: ['.js', '.jsx']
   },
   externals: {
-  react: "React",
-  "react-dom": "ReactDOM"
+    react: "React",
+    "react-dom": "ReactDOM"
   }
 };

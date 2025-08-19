@@ -1,3 +1,12 @@
 import AIchatbot from "./Aichatbot";
 
-export const ChatExtension =()=> <AIchatbot></AIchatbot>
+const ChatExtension =()=> {
+useEffect(() => {
+  console.log("AIchatbot mounted");
+}, []);
+return(
+<AIchatbot></AIchatbot>
+)
+}
+
+export default ChatExtension;
