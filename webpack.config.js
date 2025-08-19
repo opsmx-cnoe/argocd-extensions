@@ -3,10 +3,10 @@ const path = require("path");
 module.exports = {
   mode: "production",
   entry: {
-    "extension-argonaut": path.resolve(__dirname, "resources/extension-argonaut.js"),
+    "extension-argonaut": path.resolve(__dirname, "main/extension-argonaut.js"),
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "resources"),
     filename: "[name].js",
   },
   module: {
