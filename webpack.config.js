@@ -1,39 +1,31 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  mode: 'production',
-  entry:  path.resolve(__dirname, 'resources/extension-argonaut.js'), 
+  mode: "production",
+  entry: {
+    "extension-argonaut": path.resolve(__dirname, "resources/extension-argonaut.js"),
+  },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'extension-argonaut.js', 
-    library: {
-      type: 'var',
-      name: 'ExtensionArgonaut'
-    }
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
   },
   module: {
     rules: [
       {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+      {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',   
-              '@babel/preset-react'  
-            ]
-          }
-        }
+          loader: "babel-loader",
+        },
       },
-      {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader']
-      }
-    ]
+    ],
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: [".js", ".jsx"],
   },
   externals: {
     react: "React",
