@@ -169,8 +169,8 @@ const Aichatbot = () => {
     if (!message || !message.apiOutput) return;
 
     const userMessage = apiSuccess
-      ? "Successfully executed API and here is the response."
-      : "API execution failed.";
+      ? "I ran the API the agent suggested. Here is the result."
+      : "I tried running the suggested API, but it failed.";
 
     const userMsg = { user: "You", text: userMessage };
 
