@@ -1,9 +1,9 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Aichatbot.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const AIchatbot = () => {
+const Aichatbot = () => {
   const [apps, setApps] = useState([]);
   const [selectedApp, setSelectedApp] = useState("");
   const [messages, setMessages] = useState([]);
@@ -12,7 +12,6 @@ const AIchatbot = () => {
   const [backendUrl, setBackendUrl] = useState("");
   const [apiRequest, setApiRequest] = useState(null);
   const [appJson, setAppJson] = useState(null);
-  const [apiOutput, setApiOutput] = useState(null);
   const [username, setUsername] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [apiSuccess, setApiSuccess] = useState(false);
@@ -51,10 +50,10 @@ const AIchatbot = () => {
     setMessages([]);
     setInput("");
     setApiRequest(null);
-    setApiOutput(null);
+    setAppJson(null);
 
     if (!isValidUrl(backendUrl)) {
-      toast.warning("Please enter a valid backend URL.");
+      toast.warning("Please enter a valid Assistant URL.");
       return;
     }
 
@@ -74,7 +73,7 @@ const AIchatbot = () => {
     setInput("");
 
     if (!isValidUrl(backendUrl)) {
-      toast.error("Invalid backend URL.");
+      toast.error("Invalid Assistant URL.");
       return;
     }
 
@@ -93,10 +92,22 @@ const AIchatbot = () => {
       .then(res => res.json())
       .then(data => {
         const out = data.output || {};
-        setMessages(m => [...m, { user: "Agent", text: out.comment || JSON.stringify(out) }]);
+        setMessages(m => [
+          ...m,
+          { user: "Agent", text: out.comment || JSON.stringify(out) },
+          ...(out.shouldRun && out.url && out.method
+            ? [{
+                user: "Agent",
+                isApiSuggestion: true,
+                method: out.method,
+                url: out.url,
+                body: out.body
+              }]
+            : [])
+        ]);
+
         if (out.shouldRun && out.url && out.method) {
           setApiRequest({ method: out.method, url: out.url, body: out.body });
-          setApiOutput(null);
         }
       })
       .catch(() => {
@@ -115,30 +126,49 @@ const AIchatbot = () => {
     })
       .then(res => res.json())
       .then(data => {
-        setApiOutput(JSON.stringify(data, null, 2));
+        const outputMessage = {
+          user: "You",
+          isApiOutput: true,
+          text: "Here's the API response:",
+          apiOutput: JSON.stringify(data, null, 2),
+          sentToAI: false
+        };
+        setMessages(prev => [...prev, outputMessage]);
+        setApiRequest(null);
         setApiSuccess(true);
       })
       .catch(() => {
-        setApiOutput("API call failed.");
+        const outputMessage = {
+          user: "You",
+          isApiOutput: true,
+          text: "API call failed.",
+          apiOutput: "API call failed.",
+          sentToAI: false
+        };
+        setMessages(prev => [...prev, outputMessage]);
+        setApiRequest(null);
         setApiSuccess(false);
       });
   };
 
-  const sendOutputToAI = () => {
-    if (!apiOutput) return;
+  const sendOutputToAI = (index) => {
+    const message = messages[index];
+    if (!message || !message.apiOutput) return;
 
     const userMessage = apiSuccess
       ? "Successfully executed API and here is the response."
       : "API execution failed.";
 
-    setMessages(m => [...m, { user: "You", text: userMessage }]);
-    setApiOutput(null);
+    setMessages(prev => [
+      ...prev,
+      { user: "You", text: userMessage }
+    ]);
 
     const body = {
       message: userMessage,
       sessionId,
       application: selectedApp,
-      appData: { apiResult: apiOutput }
+      appData: { apiResult: message.apiOutput }
     };
 
     fetch(backendUrl, {
@@ -149,38 +179,56 @@ const AIchatbot = () => {
       .then(res => res.json())
       .then(data => {
         const out = data.output || {};
-        setMessages(m => [...m, { user: "Agent", text: out.comment || JSON.stringify(out) }]);
+        setMessages(m => [
+          ...m,
+          { user: "Agent", text: out.comment || JSON.stringify(out) },
+          ...(out.shouldRun && out.url && out.method
+            ? [{
+                user: "Agent",
+                isApiSuggestion: true,
+                method: out.method,
+                url: out.url,
+                body: out.body
+              }]
+            : [])
+        ]);
+
         if (out.shouldRun && out.url && out.method) {
           setApiRequest({ method: out.method, url: out.url, body: out.body });
-          setApiOutput(null);
         }
       });
+
+    setMessages(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], sentToAI: true };
+      return updated;
+    });
   };
 
   return (
     <div className="ai-chat-container">
-       <ToastContainer position="top-right" autoClose={4000} />
+      <ToastContainer position="top-right" autoClose={4000} />
       <h2 className="ai-chat-title">💬 Argo CD Chat Assistant</h2>
 
-<div className="ai-chat-controls">
-  <input
-    className="ai-chat-input"
-    placeholder="Enter backend URL"
-    value={backendUrl}
-    onChange={e => setBackendUrl(e.target.value)}
-  />
+      <div className="ai-chat-controls">
+        <input
+          className="ai-chat-input"
+          placeholder="Enter Assistant URL"
+          value={backendUrl}
+          onChange={e => setBackendUrl(e.target.value)}
+        />
 
-  <select
-    value={selectedApp}
-    onChange={handleAppChange}
-    className={`ai-chat-select ${selectedApp ? "selected" : ""}`}
-  >
-    <option value="" disabled>📦 Select an ArgoCD Application</option>
-    {apps.map(app => (
-      <option key={app} value={app}>{app}</option>
-    ))}
-  </select>
-</div>
+        <select
+          value={selectedApp}
+          onChange={handleAppChange}
+          className={`ai-chat-select ${selectedApp ? "selected" : ""}`}
+        >
+          <option value="" disabled>📦 Select an ArgoCD Application</option>
+          {apps.map(app => (
+            <option key={app} value={app}>{app}</option>
+          ))}
+        </select>
+      </div>
 
       {loading && <div className="ai-chat-loading">⏳ Analyzing app...</div>}
 
@@ -192,31 +240,38 @@ const AIchatbot = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   {msg.user === "You" ? "🧑" : "🤖"} <strong>{msg.user}:</strong>
                 </div>
-                <span>{msg.text}</span>
+
+                {msg.isApiSuggestion ? (
+                  <>
+                    <p style={{ margin: "6px 0" }}>I recommend calling:</p>
+                    <code>{msg.method} {msg.url}</code>
+                    <button
+                      onClick={runSuggestedRequest}
+                      className="ai-chat-button"
+                      style={{ marginTop: '10px' }}
+                    >
+                      🚀 Run This API
+                    </button>
+                  </>
+                ) : msg.isApiOutput ? (
+                  <>
+                    <p>{msg.text}</p>
+                    <pre>{msg.apiOutput}</pre>
+                    {!msg.sentToAI && (
+                      <button
+                        onClick={() => sendOutputToAI(idx)}
+                        className="ai-chat-button"
+                        style={{ marginTop: '10px' }}
+                      >
+                        📤 Send Output to AI
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <span>{msg.text}</span>
+                )}
               </div>
             ))}
-
-            {apiRequest && (
-              <div className="ai-chat-message agent">
-                <strong>🤖 Agent:</strong>
-                <p style={{ margin: "6px 0" }}>I recommend calling:</p>
-                <code>{apiRequest.method} {apiRequest.url}</code>
-                <button onClick={runSuggestedRequest} className="ai-chat-button" style={{ marginTop: '10px' }}>
-                  🚀 Run This API
-                </button>
-              </div>
-            )}
-
-            {apiOutput && (
-              <div className="ai-chat-message user">
-                <strong>🧑 You:</strong>
-                <p>Here's the API response:</p>
-                <pre>{apiOutput}</pre>
-                <button onClick={sendOutputToAI} className="ai-chat-button" style={{ marginTop: '10px' }}>
-                  📤 Send Output to AI
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="ai-chat-footer">
@@ -235,4 +290,4 @@ const AIchatbot = () => {
   );
 };
 
-export default AIchatbot;
+export default Aichatbot;
