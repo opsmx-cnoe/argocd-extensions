@@ -84,7 +84,7 @@ const Aichatbot = () => {
       application: selectedApp,
       appData: { status: appJson.status, spec: appJson.spec }
     };
-     setProcessingApi(true);
+    setProcessingApi(true);
     fetch(backendUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -98,12 +98,12 @@ const Aichatbot = () => {
           { user: "Agent", text: out.comment || JSON.stringify(out) },
           ...(out.shouldRun && out.url && out.method
             ? [{
-                user: "Agent",
-                isApiSuggestion: true,
-                method: out.method,
-                url: out.url,
-                body: out.body
-              }]
+              user: "Agent",
+              isApiSuggestion: true,
+              method: out.method,
+              url: out.url,
+              body: out.body
+            }]
             : [])
         ]);
 
@@ -121,7 +121,7 @@ const Aichatbot = () => {
   const runSuggestedRequest = () => {
     if (!apiRequest) return;
     const fullUrl = apiRequest.url.startsWith("http") ? apiRequest.url : `${window.location.origin}${apiRequest.url}`;
-
+    setProcessingApi(true);
     fetch(fullUrl, {
       method: apiRequest.method,
       headers: { "Content-Type": "application/json" },
@@ -144,6 +144,7 @@ const Aichatbot = () => {
         setMessages(prev => [...prev, introMessage, outputMessage]);
         setApiRequest(null);
         setApiSuccess(true);
+        setProcessingApi(false);
       })
       .catch(() => {
         const introMessage = {
@@ -161,6 +162,7 @@ const Aichatbot = () => {
         setMessages(prev => [...prev, introMessage, errorMessage]);
         setApiRequest(null);
         setApiSuccess(false);
+        setProcessingApi(false);
       });
   };
 
@@ -180,7 +182,7 @@ const Aichatbot = () => {
       application: selectedApp,
       appData: { apiResult: message.apiOutput }
     };
-
+    setProcessingApi(true);
     setMessages(prev => {
       const updated = [...prev, userMsg];
       updated[index] = { ...updated[index], sentToAI: true };
@@ -200,18 +202,25 @@ const Aichatbot = () => {
           { user: "Agent", text: out.comment || JSON.stringify(out) },
           ...(out.shouldRun && out.url && out.method
             ? [{
-                user: "Agent",
-                isApiSuggestion: true,
-                method: out.method,
-                url: out.url,
-                body: out.body
-              }]
+              user: "Agent",
+              isApiSuggestion: true,
+              method: out.method,
+              url: out.url,
+              body: out.body
+            }]
             : [])
         ]);
 
         if (out.shouldRun && out.url && out.method) {
           setApiRequest({ method: out.method, url: out.url, body: out.body });
         }
+        setProcessingApi(false);
+      }).catch(() => {
+        setMessages(prev => [
+          ...prev,
+          { user: "Agent", text: "❌ Failed to send output to AI assistant. Please try again later." }
+        ]);
+        setProcessingApi(false);
       });
   };
 
@@ -241,7 +250,7 @@ const Aichatbot = () => {
       </div>
 
       {loading && <div className="ai-chat-loading">⏳ Analyzing app...</div>}
-      
+
       {selectedApp && (
         <>
           <div className="ai-chat-messages">
@@ -281,7 +290,7 @@ const Aichatbot = () => {
                 )}
               </div>
             ))}
-             {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
+            {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
           </div>
 
           <div className="ai-chat-footer">
