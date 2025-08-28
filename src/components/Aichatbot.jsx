@@ -279,9 +279,9 @@ const Aichatbot = () => {
                 ) : (
                   <span>{msg.text}</span>
                 )}
-                {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
               </div>
             ))}
+             {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
           </div>
 
           <div className="ai-chat-footer">
