@@ -15,6 +15,7 @@ const Aichatbot = () => {
   const [username, setUsername] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [apiSuccess, setApiSuccess] = useState(false);
+  const [processingApi, setProcessingApi] = useState(false);
 
   useEffect(() => {
     fetch(`${window.location.origin}/api/v1/applications`)
@@ -83,7 +84,7 @@ const Aichatbot = () => {
       application: selectedApp,
       appData: { status: appJson.status, spec: appJson.spec }
     };
-
+     setProcessingApi(true);
     fetch(backendUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,9 +110,11 @@ const Aichatbot = () => {
         if (out.shouldRun && out.url && out.method) {
           setApiRequest({ method: out.method, url: out.url, body: out.body });
         }
+        setProcessingApi(false);
       })
       .catch(() => {
         setMessages(m => [...m, { user: "Agent", text: "Backend error occurred." }]);
+        setProcessingApi(false);
       });
   };
 
@@ -126,26 +129,36 @@ const Aichatbot = () => {
     })
       .then(res => res.json())
       .then(data => {
+        const introMessage = {
+          user: "Agent",
+          text: "✅ Successfully executed API and here is the response."
+        };
+
         const outputMessage = {
-          user: "You",
+          user: "Agent",
           isApiOutput: true,
-          text: "Here's the API response:",
           apiOutput: JSON.stringify(data, null, 2),
           sentToAI: false
         };
-        setMessages(prev => [...prev, outputMessage]);
+
+        setMessages(prev => [...prev, introMessage, outputMessage]);
         setApiRequest(null);
         setApiSuccess(true);
       })
       .catch(() => {
-        const outputMessage = {
-          user: "You",
+        const introMessage = {
+          user: "Agent",
+          text: "❌ API execution failed. Here's the error:"
+        };
+
+        const errorMessage = {
+          user: "Agent",
           isApiOutput: true,
-          text: "API call failed.",
           apiOutput: "API call failed.",
           sentToAI: false
         };
-        setMessages(prev => [...prev, outputMessage]);
+
+        setMessages(prev => [...prev, introMessage, errorMessage]);
         setApiRequest(null);
         setApiSuccess(false);
       });
@@ -159,10 +172,7 @@ const Aichatbot = () => {
       ? "Successfully executed API and here is the response."
       : "API execution failed.";
 
-    setMessages(prev => [
-      ...prev,
-      { user: "You", text: userMessage }
-    ]);
+    const userMsg = { user: "You", text: userMessage };
 
     const body = {
       message: userMessage,
@@ -170,6 +180,12 @@ const Aichatbot = () => {
       application: selectedApp,
       appData: { apiResult: message.apiOutput }
     };
+
+    setMessages(prev => {
+      const updated = [...prev, userMsg];
+      updated[index] = { ...updated[index], sentToAI: true };
+      return updated;
+    });
 
     fetch(backendUrl, {
       method: "POST",
@@ -197,12 +213,6 @@ const Aichatbot = () => {
           setApiRequest({ method: out.method, url: out.url, body: out.body });
         }
       });
-
-    setMessages(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], sentToAI: true };
-      return updated;
-    });
   };
 
   return (
@@ -231,7 +241,7 @@ const Aichatbot = () => {
       </div>
 
       {loading && <div className="ai-chat-loading">⏳ Analyzing app...</div>}
-
+      
       {selectedApp && (
         <>
           <div className="ai-chat-messages">
@@ -255,7 +265,6 @@ const Aichatbot = () => {
                   </>
                 ) : msg.isApiOutput ? (
                   <>
-                    <p>{msg.text}</p>
                     <pre>{msg.apiOutput}</pre>
                     {!msg.sentToAI && (
                       <button
@@ -270,6 +279,7 @@ const Aichatbot = () => {
                 ) : (
                   <span>{msg.text}</span>
                 )}
+                {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
               </div>
             ))}
           </div>
