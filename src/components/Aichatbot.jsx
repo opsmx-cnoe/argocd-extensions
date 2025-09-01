@@ -225,40 +225,51 @@ const Aichatbot = () => {
   };
 
   return (
-   <div className="ai-chat-container">
-  <ToastContainer position="top-right" autoClose={4000} />
-  <h2 className="ai-chat-title">💬 Argo CD Chat Assistant</h2>
+    <div className="ai-chat-container">
+      <ToastContainer position="top-right" autoClose={4000} />
+      <h2 className="ai-chat-title">💬 Argo CD Chat Assistant</h2>
 
-  <div className="ai-chat-controls">
-    <input
-      className="ai-chat-input"
-      placeholder="Enter Assistant URL"
-      value={backendUrl}
-      onChange={e => setBackendUrl(e.target.value)}
-    />
-  </div>
+      <div className="ai-chat-controls">
+        <input
+          className="ai-chat-input"
+          placeholder="Enter Assistant URL"
+          value={backendUrl}
+          onChange={e => setBackendUrl(e.target.value)}
+        />
 
-  {isValidUrl(backendUrl) ? (
-    <>
-      <select
-        value={selectedApp}
-        onChange={handleAppChange}
-        className={`ai-chat-select ${selectedApp ? "selected" : ""}`}
-      >
-        <option value="" disabled>📦 Select an ArgoCD Application</option>
-        {apps.map(app => (
-          <option key={app} value={app}>{app}</option>
-        ))}
-      </select>
+        {isValidUrl(backendUrl) && (
+          <select
+            value={selectedApp}
+            onChange={handleAppChange}
+            className={`ai-chat-select ${selectedApp ? "selected" : ""}`}
+          >
+            <option value="" disabled>📦 Select an ArgoCD Application</option>
+            {apps.map(app => (
+              <option key={app} value={app}>{app}</option>
+            ))}
+          </select>
+        )}
+      </div>
+
 
       {loading && <div className="ai-chat-loading">⏳ Analyzing app...</div>}
+
+
+      {backendUrl && !isValidUrl(backendUrl) && (
+        <p className="ai-chat-info">⚠️ Please enter a valid Assistant URL to continue.</p>
+      )}
+      {!backendUrl && (
+        <p className="ai-chat-info" style={{ opacity: 0.6 }}>
+          💡 Please provide your Assistant URL to begin.
+        </p>
+      )}
 
       {selectedApp && (
         <>
           <div className="ai-chat-messages">
             {messages.map((msg, idx) => (
               <div key={idx} className={`ai-chat-message ${msg.user === "You" ? "user" : "agent"}`}>
-                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   {msg.user === "You" ? "🧑" : "🤖"} <strong>{msg.user}:</strong>
                 </div>
 
@@ -294,7 +305,7 @@ const Aichatbot = () => {
             ))}
             {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
           </div>
-          
+
           <div className="ai-chat-footer">
             <textarea
               className="ai-chat-textarea"
@@ -309,11 +320,7 @@ const Aichatbot = () => {
           </div>
         </>
       )}
-    </>
-  ) : (
-    <p className="ai-chat-info">⚠️ Please enter a valid Assistant URL to continue.</p>
-  )}
-</div>
+    </div>
   );
 };
 
