@@ -229,3 +229,12 @@
 .ai-chat-messages::-webkit-scrollbar-track {
   background-color: transparent;
 }
+.ai-chat-info {
+  background-color: #e9f5ff;
+  color: #004085;
+  padding: 12px 16px;
+  border: 1px solid #b8daff;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 20px;
+}

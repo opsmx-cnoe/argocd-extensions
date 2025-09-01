@@ -225,29 +225,31 @@ const Aichatbot = () => {
   };
 
   return (
-    <div className="ai-chat-container">
-      <ToastContainer position="top-right" autoClose={4000} />
-      <h2 className="ai-chat-title">💬 Argo CD Chat Assistant</h2>
+   <div className="ai-chat-container">
+  <ToastContainer position="top-right" autoClose={4000} />
+  <h2 className="ai-chat-title">💬 Argo CD Chat Assistant</h2>
 
-      <div className="ai-chat-controls">
-        <input
-          className="ai-chat-input"
-          placeholder="Enter Assistant URL"
-          value={backendUrl}
-          onChange={e => setBackendUrl(e.target.value)}
-        />
+  <div className="ai-chat-controls">
+    <input
+      className="ai-chat-input"
+      placeholder="Enter Assistant URL"
+      value={backendUrl}
+      onChange={e => setBackendUrl(e.target.value)}
+    />
+  </div>
 
-        <select
-          value={selectedApp}
-          onChange={handleAppChange}
-          className={`ai-chat-select ${selectedApp ? "selected" : ""}`}
-        >
-          <option value="" disabled>📦 Select an ArgoCD Application</option>
-          {apps.map(app => (
-            <option key={app} value={app}>{app}</option>
-          ))}
-        </select>
-      </div>
+  {isValidUrl(backendUrl) ? (
+    <>
+      <select
+        value={selectedApp}
+        onChange={handleAppChange}
+        className={`ai-chat-select ${selectedApp ? "selected" : ""}`}
+      >
+        <option value="" disabled>📦 Select an ArgoCD Application</option>
+        {apps.map(app => (
+          <option key={app} value={app}>{app}</option>
+        ))}
+      </select>
 
       {loading && <div className="ai-chat-loading">⏳ Analyzing app...</div>}
 
@@ -256,7 +258,7 @@ const Aichatbot = () => {
           <div className="ai-chat-messages">
             {messages.map((msg, idx) => (
               <div key={idx} className={`ai-chat-message ${msg.user === "You" ? "user" : "agent"}`}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   {msg.user === "You" ? "🧑" : "🤖"} <strong>{msg.user}:</strong>
                 </div>
 
@@ -292,7 +294,7 @@ const Aichatbot = () => {
             ))}
             {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
           </div>
-
+          
           <div className="ai-chat-footer">
             <textarea
               className="ai-chat-textarea"
@@ -301,11 +303,17 @@ const Aichatbot = () => {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
             />
-            <button onClick={handleSend} className="ai-chat-button">Send</button>
+            <button onClick={handleSend} className="ai-chat-button" disabled={processingApi}>
+              {processingApi ? '⌛' : 'Send'}
+            </button>
           </div>
         </>
       )}
-    </div>
+    </>
+  ) : (
+    <p className="ai-chat-info">⚠️ Please enter a valid Assistant URL to continue.</p>
+  )}
+</div>
   );
 };
 
