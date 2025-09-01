@@ -69,7 +69,7 @@ const Aichatbot = () => {
   };
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || processingApi) return;
     setMessages(m => [...m, { user: "You", text: input }]);
     setInput("");
 
