@@ -224,6 +224,17 @@ const Aichatbot = () => {
       });
   };
 
+  const handleBackendUrl = (e) => {
+    const value = e.target.value;
+  if (value !== "") {
+    setBackendUrl(value);
+  } else {
+    setBackendUrl("");
+    setSelectedApp("");
+    setMessages([]);
+  }
+  }
+
   return (
     <div className="ai-chat-container">
       <ToastContainer position="top-right" autoClose={4000} />
@@ -234,7 +245,7 @@ const Aichatbot = () => {
           className="ai-chat-input"
           placeholder="Enter Assistant URL"
           value={backendUrl}
-          onChange={e => setBackendUrl(e.target.value)}
+          onChange={handleBackendUrl}
         />
 
         {isValidUrl(backendUrl) && (
