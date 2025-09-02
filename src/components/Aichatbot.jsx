@@ -147,17 +147,19 @@ const Aichatbot = () => {
         setApiSuccess(true);
         setProcessingApi(false);
       })
-      .catch(() => {
+      .catch(async (err) => {
+        const errorText = err?.message || "API call failed due to an unknown error.";
         const introMessage = {
           user: "Tool",
           text: "❌ API execution failed. Here's the error:"
         };
 
         const errorMessage = {
-          user: "Agent",
+          user: "Tool",
           isApiOutput: true,
-          apiOutput: "API call failed.",
-          sentToAI: false
+          apiOutput: errorText,
+          sentToAI: false,
+          noOutput: true
         };
 
         setMessages(prev => [...prev, introMessage, errorMessage]);
@@ -318,7 +320,7 @@ const Aichatbot = () => {
                 {msg.isApiOutput && (
                   <>
                     <pre>{msg.apiOutput}</pre>
-                    {!msg.sentToAI && (
+                    {!msg.sentToAI &&  !msg.noOutput && (
                       <button
                         onClick={() => sendOutputToAI(idx)}
                         className="ai-chat-button"
