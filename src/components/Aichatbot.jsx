@@ -95,7 +95,8 @@ const Aichatbot = () => {
         const out = data.output || {};
         setMessages(m => [
           ...m,
-          { user: "Agent", text: out.comment || JSON.stringify(out) },
+          { user: "Agent", text: out.comment || JSON.stringify(out),url: (!out.shouldRun && out.url) ? out.url : undefined,
+    method: (!out.shouldRun && out.method) ? out.method : undefined, },
           ...(out.shouldRun && out.url && out.method
             ? [{
               user: "Agent",
