@@ -95,7 +95,7 @@ const Aichatbot = () => {
         const out = data.output || {};
         setMessages(m => [
           ...m,
-          { user: "Agent", text: out.comment || JSON.stringify(out), url: out.url, shouldRun: out.shouldRun, method: out.method },
+          { user: "Agent", text: out.comment || JSON.stringify(out) },
           ...(out.shouldRun && out.url && out.method
             ? [{
               user: "Agent",
@@ -288,7 +288,7 @@ const Aichatbot = () => {
                   {msg.user === "You" ? "🧑" : msg.user === "Tool" ? "🔁" : "🤖"}{" "}
                   <strong>{msg.user}:</strong>{" "}
                   {msg.text}
-                  {msg.url && msg.method && !msg.shouldRun && (
+                  {msg.url && msg.method && !msg.shouldRun &&  !msg.isApiSuggestion && (
                     <a
                       href={msg.url}
                       target="_blank"
