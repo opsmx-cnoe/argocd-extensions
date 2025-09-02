@@ -95,7 +95,7 @@ const Aichatbot = () => {
         const out = data.output || {};
         setMessages(m => [
           ...m,
-          { user: "Agent", text: out.comment || JSON.stringify(out) },
+          { user: "Agent", text: out.comment || JSON.stringify(out), url: out.url, shouldRun: out.shouldRun, method: out.method },
           ...(out.shouldRun && out.url && out.method
             ? [{
               user: "Agent",
@@ -130,12 +130,12 @@ const Aichatbot = () => {
       .then(res => res.json())
       .then(data => {
         const introMessage = {
-          user: "Agent",
+          user: "Tool",
           text: "✅ Successfully executed API and here is the response."
         };
 
         const outputMessage = {
-          user: "Agent",
+          user: "Tool",
           isApiOutput: true,
           apiOutput: JSON.stringify(data, null, 2),
           sentToAI: false
@@ -148,7 +148,7 @@ const Aichatbot = () => {
       })
       .catch(() => {
         const introMessage = {
-          user: "Agent",
+          user: "Tool",
           text: "❌ API execution failed. Here's the error:"
         };
 
@@ -171,7 +171,7 @@ const Aichatbot = () => {
     if (!message || !message.apiOutput) return;
 
     const userMessage = apiSuccess
-      ? "I ran the API the agent suggested. Here is the result."
+      ? "I ran the API the tool suggested. Here is the result."
       : "I tried running the suggested API, but it failed.";
 
     const userMsg = { user: "You", text: userMessage };
@@ -226,13 +226,13 @@ const Aichatbot = () => {
 
   const handleBackendUrl = (e) => {
     const value = e.target.value;
-  if (value !== "") {
-    setBackendUrl(value);
-  } else {
-    setBackendUrl("");
-    setSelectedApp("");
-    setMessages([]);
-  }
+    if (value !== "") {
+      setBackendUrl(value);
+    } else {
+      setBackendUrl("");
+      setSelectedApp("");
+      setMessages([]);
+    }
   }
 
   return (
@@ -279,12 +279,28 @@ const Aichatbot = () => {
         <>
           <div className="ai-chat-messages">
             {messages.map((msg, idx) => (
-              <div key={idx} className={`ai-chat-message ${msg.user === "You" ? "user" : "agent"}`}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  {msg.user === "You" ? "🧑" : "🤖"} <strong>{msg.user}:</strong>
-                </div>
+              <div
+                key={idx}
+                className={`ai-chat-message ${msg.user === "You" ? "user" : msg.user === "Tool" ? "tool" : "agent"
+                  }`}
+              >
+                <span>
+                  {msg.user === "You" ? "🧑" : msg.user === "Tool" ? "🔁" : "🤖"}{" "}
+                  <strong>{msg.user}:</strong>{" "}
+                  {msg.text}
+                  {msg.url && msg.method && !msg.shouldRun && (
+                    <a
+                      href={msg.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ marginLeft: '8px', wordBreak: 'break-word' }}
+                    >
+                      🔗 {msg.url}
+                    </a>
+                  )}
+                </span>
 
-                {msg.isApiSuggestion ? (
+                {msg.isApiSuggestion && (
                   <>
                     <p style={{ margin: "6px 0" }}>I recommend calling:</p>
                     <code>{msg.method} {msg.url}</code>
@@ -296,7 +312,9 @@ const Aichatbot = () => {
                       🚀 Run This API
                     </button>
                   </>
-                ) : msg.isApiOutput ? (
+                )}
+
+                {msg.isApiOutput && (
                   <>
                     <pre>{msg.apiOutput}</pre>
                     {!msg.sentToAI && (
@@ -305,14 +323,13 @@ const Aichatbot = () => {
                         className="ai-chat-button"
                         style={{ marginTop: '10px' }}
                       >
-                        📤 Send Output to AI
+                        📤 Send Output
                       </button>
                     )}
                   </>
-                ) : (
-                  <span>{msg.text}</span>
                 )}
               </div>
+
             ))}
             {processingApi && <div className="ai-agent-thinking">🤖 Thinking...</div>}
           </div>
