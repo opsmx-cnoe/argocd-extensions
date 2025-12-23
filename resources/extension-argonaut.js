@@ -13,6 +13,10 @@
     const [username, setUsername] = React.useState("");
     const [sessionId, setSessionId] = React.useState("");
     const [apiSuccess, setApiSuccess] = React.useState(false);
+    const [pendingApp, setPendingApp] = React.useState(() => {
+      const params = new URLSearchParams(window.location.search || "");
+      return params.get("app") || "";
+    });
 
     React.useEffect(() => {
       fetch(`${window.location.origin}/api/v1/applications`)
@@ -35,8 +39,7 @@
       }
     };
 
-    const handleAppChange = (e) => {
-      const appName = e.target.value;
+    const selectApp = (appName, opts = {}) => {
       const timestamp = Math.floor(Date.now() / 1000);
       const sid = `${username}_${timestamp}`;
       setSessionId(sid);
@@ -47,7 +50,9 @@
       setApiOutput(null);
 
       if (!isValidUrl(backendUrl)) {
-        alert("Please enter a valid backend URL");
+        if (!opts.silent) {
+          alert("Please enter a valid backend URL");
+        }
         return;
       }
 
@@ -61,6 +66,18 @@
         })
         .finally(() => setLoading(false));
     };
+
+    const handleAppChange = (e) => {
+      const appName = e.target.value;
+      selectApp(appName);
+    };
+
+    React.useEffect(() => {
+      if (!pendingApp || selectedApp) return;
+      if (!isValidUrl(backendUrl)) return;
+      selectApp(pendingApp, { silent: true });
+      setPendingApp("");
+    }, [pendingApp, selectedApp, backendUrl, username]);
 
     const handleSend = () => {
       if (!input.trim()) return;
@@ -286,4 +303,26 @@
   };
 
   window.extensionsAPI.registerSystemLevelExtension(ChatExtension, "Chat", "/chat", "fa-comments");
+
+  const TopBarChatShortcut = (props) => {
+    const appName =
+      (props && props.application && props.application.metadata && props.application.metadata.name) ||
+      (props && props.app && props.app.metadata && props.app.metadata.name) ||
+      "";
+    const goToChat = () => {
+      const dest = appName ? `/chat?app=${encodeURIComponent(appName)}` : "/chat";
+      window.location.assign(dest);
+    };
+    return React.createElement("div", { onClick: goToChat }, "Chat Assistant");
+  };
+
+  window.extensionsAPI.registerTopBarActionMenuExt(
+    TopBarChatShortcut,
+    "Chat Assistant",
+    "chat_assistant",
+    null,
+    () => true,
+    "fa-comments",
+    true
+  );
 })();
