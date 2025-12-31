@@ -28,13 +28,9 @@ const Aichatbot = () => {
       .then(data => setUsername(data.username || "unknown"))
       .catch(console.error);
     
-    fetch(`${window.location.origin}/api/v1/config`)
-    .then(res => res.json())
-    .then(cfg => {
-      const url = cfg.config["extension.n8n.url"] || "";
-      setBackendUrl(url);
-    })
-    .catch(console.error);
+    const url = window.ASSISTANT_URL || "";
+    console.log("Assistant Url", url);
+    setBackendUrl(url);
 
   }, []);
 
