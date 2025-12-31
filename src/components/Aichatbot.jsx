@@ -27,11 +27,16 @@ const Aichatbot = () => {
       .then(res => res.json())
       .then(data => setUsername(data.username || "unknown"))
       .catch(console.error);
+  if (window.argo?.getAppConfig) {
+    window.argo.getAppConfig().then(cfg => {
+      const url = cfg?.ui?.extensions?.aichatbot?.n8nUrl || "";
+      setBackendUrl(url);
+    });
+  } else {
+    console.warn("window.argo not available (likely running outside Argo CD UI)");
+    setBackendUrl(""); 
+  }
     
-    const url = window.ASSISTANT_URL || "";
-    console.log("Assistant Url", url);
-    setBackendUrl(url);
-
   }, []);
 
   useEffect(() => {
@@ -251,8 +256,7 @@ const Aichatbot = () => {
       <div className="ai-chat-controls">
         <input
           className="ai-chat-input"
-          placeholder="Enter Assistant URL"
-          value={backendUrl}
+          value={backendUrl || "Loading Assistant URL..."}
           onChange={handleBackendUrl}
         />
 
